@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, status
 from typing import Annotated, Dict
-from backend.api.dependencies import get_api_key
+
+
+from backend.api.dependencies import get_api_key, tweets_service
+
+from backend.services.tweets import TweetsService
+
+from backend.schemas.tweets import CreateTweetSchema
 
 router = APIRouter(
     prefix="/api/tweets",
@@ -13,6 +19,7 @@ async def get_tweets(
         api_key: str = Depends(get_api_key)
 ):
     # Логика для возвращения списка твитов для текущего пользователя
+    print(api_key)
     tweets = [
         {
             "id": 1,
@@ -27,13 +34,15 @@ async def get_tweets(
 
 @router.post("")
 async def create_tweet(
-        tweet_data: str,
-        tweet_media_ids: list[int] = [],
+        tweet: CreateTweetSchema,
+        service: Annotated[TweetsService, Depends(tweets_service)],
         api_key: str = Depends(get_api_key)  # Подключаем зависимость для API ключа
 ):
     # Логика создания твита
     # Валидация, сохранение в базу данных и т.д.
-    return {"result": True, "tweet_id": 1}
+    created_tweet = await service.create_tweet(tweet)
+
+    return {"result": True, "tweet_id": created_tweet.id}
 
 
 @router.delete("/{tweet_id}")
