@@ -1,13 +1,12 @@
 import os
 import asyncio
 import uvicorn
-from fastapi import FastAPI, Depends
+
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from backend.api.dependencies import get_api_key
 
 from backend.api.routers import all_routers
-
+from backend.database.db import init_db
 app = FastAPI()
 
 for router in all_routers:
@@ -18,8 +17,9 @@ static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 
-
 async def main():
+    await init_db()
+
     uvicorn.run('main:app', host='localhost', port=8000, reload=True)
 
 
