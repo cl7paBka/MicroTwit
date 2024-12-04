@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from backend.utils.config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
 
+
 # Подключение к бд
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
@@ -19,7 +20,13 @@ class Base(DeclarativeBase):
 
 # Инициализация БД и создание таблиц, происходящее при запуске
 async def init_db():
+    # Явно импортирую тут модели, потому что без этого таблицы не создавались о.О
+    from backend.models.models import Tweet, TweetLike, User
+
     async with engine.begin() as conn:
+        # Удаление всех таблиц для тестов
+        # await conn.run_sync(Base.metadata.drop_all)
+
         await conn.run_sync(Base.metadata.create_all)
 
 
